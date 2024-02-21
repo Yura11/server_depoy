@@ -83,7 +83,7 @@ data "template_file" "inventory" {
 }
 
 resource "local_file" "dynamic_inventory" {
-  depends_on = [aws_instance.game-server]
+  depends_on = [data.template_file.inventory]
 
   filename = "dynamic_inventory.ini"
   content  = data.template_file.inventory.rendered
