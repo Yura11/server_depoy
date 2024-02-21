@@ -9,8 +9,8 @@ terraform {
 
 provider "aws" {
   region     = "eu-central-1"
-  access_key = var.AWS_ACCESS_KEY_ID
-  secret_key = var.AWS_SECRET_ACCESS_KEY
+  access_key = "AKIAX24JP2TAADN3MEUB"
+  secret_key = "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"
 }
 
 // To Generate Private Key
@@ -37,7 +37,7 @@ resource "local_file" "private_key" {
 
 # Create a security group
 resource "aws_security_group" "sg_ec2" {
-  name        = "sg_ec2_"
+  name        = "sg_ec2"
   description = "Security group for EC2"
 
   ingress {
@@ -56,43 +56,60 @@ resource "aws_security_group" "sg_ec2" {
 }
 
 resource "aws_instance" "game-server" {
-  count                  = 1
   ami                    = "ami-0972a4c30cc617cd4"
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.key_pair.key_name
-  vpc_security_group_ids = [aws_security_group.sg_ec2.id]  # Use the same security group for all instances
+  vpc_security_group_ids = [aws_security_group.sg_ec2.id]
 
   tags = {
-    Name = "public_instance-${count.index + 1}"  # Adding index to make unique tags
+    Name = "public_instance"
   }
 
   root_block_device {
     volume_size = 30
     volume_type = "gp2"
   }
+   provisioner "local-exec" {
+    command = "touch dynamic_inventory.ini"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "echo 'EC2 instance is ready.'"
+    ]
+
+    connection {
+      type        = "ssh"
+      host        = self.public_ip
+      user        = "ubuntu"
+      private_key = tls_private_key.rsa_4096.private_key_pem
+    }
+  }
 }
 
 data "template_file" "inventory" {
   template = <<-EOT
     [ec2_instances]
-    % for instance in aws_instance.game-server:
-    ${instance.private_ip} ansible_user=ubuntu ansible_private_key_file=${path.module}/${var.key_name}
-    % endfor
+    ${aws_instance.public_instance.public_ip} ansible_user=ubuntu ansible_private_key_file=${path.module}/${var.key_name}
     EOT
 }
 
 resource "local_file" "dynamic_inventory" {
-  depends_on = [data.template_file.inventory]
+  depends_on = [aws_instance.public_instance]
 
   filename = "dynamic_inventory.ini"
   content  = data.template_file.inventory.rendered
+
+  provisioner "local-exec" {
+    command = "chmod 400 ${local_file.dynamic_inventory.filename}"
+  }
 }
 
 resource "null_resource" "run_ansible" {
   depends_on = [local_file.dynamic_inventory]
 
   provisioner "local-exec" {
-    command     = "chmod 400 ${local_file.dynamic_inventory.filename} && ansible-playbook -i dynamic_inventory.ini install-docker-on-ubuntu.yml"
+    command = "ansible-playbook -i dynamic_inventory.ini install-docker-on-ubuntu.yml"
     working_dir = path.module
   }
 }
