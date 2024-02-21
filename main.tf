@@ -56,13 +56,14 @@ resource "aws_security_group" "sg_ec2" {
 }
 
 resource "aws_instance" "game-server" {
+  count                  = 1
   ami                    = "ami-0972a4c30cc617cd4"
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.key_pair.key_name
-  vpc_security_group_ids = [aws_security_group.sg_ec2.id]
+  vpc_security_group_ids = [aws_security_group.sg_ec2.id]  # Use the same security group for all instances
 
   tags = {
-    Name = "public_instance"
+    Name = "public_instance-${count.index + 1}"  # Adding index to make unique tags
   }
 
   root_block_device {
@@ -74,7 +75,9 @@ resource "aws_instance" "game-server" {
 data "template_file" "inventory" {
   template = <<-EOT
     [ec2_instances]
-    ${aws_instance.game-server.private_ip} ansible_user=ubuntu ansible_private_key_file=${path.module}/${var.key_name}
+    % for instance in aws_instance.game-server:
+    ${instance.private_ip} ansible_user=ubuntu ansible_private_key_file=${path.module}/${var.key_name}
+    % endfor
     EOT
 }
 
