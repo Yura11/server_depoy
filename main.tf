@@ -69,6 +69,10 @@ resource "aws_instance" "game-server" {
     volume_size = 30
     volume_type = "gp2"
   }
+
+  provisioner "local-exec" {
+    command = "chmod 400 ${local_file.dynamic_inventory.filename}"
+  }
 }
 
 data "template_file" "inventory" {
@@ -84,16 +88,12 @@ resource "local_file" "dynamic_inventory" {
   filename = "dynamic_inventory.ini"
   content  = data.template_file.inventory.rendered
 }
-provisioner "local-exec" {
-    command = "chmod 400 ${local_file.dynamic_inventory.filename}"
-  }
-}
 
 resource "null_resource" "run_ansible" {
   depends_on = [local_file.dynamic_inventory]
 
   provisioner "local-exec" {
-    command = "ansible-playbook -i dynamic_inventory.ini install-docker-on-ubuntu.yml"
+    command     = "ansible-playbook -i dynamic_inventory.ini install-docker-on-ubuntu.yml"
     working_dir = path.module
   }
 }
