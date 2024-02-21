@@ -55,7 +55,7 @@ resource "aws_security_group" "sg_ec2" {
   }
 }
 
-resource "aws_instance" "game-server" {
+resource "aws_instance" "public_instance" {
   ami                    = "ami-0972a4c30cc617cd4"
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.key_pair.key_name
