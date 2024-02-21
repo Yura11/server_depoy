@@ -20,8 +20,7 @@ resource "tls_private_key" "rsa_4096" {
 }
 
 variable "key_name" {
-  description = "Name of the SSH key pair"
-  default     = "game"
+  description = "game"
 }
 
 // Create Key Pair for Connecting EC2 via SSH
@@ -36,7 +35,7 @@ resource "local_file" "private_key" {
   filename = var.key_name
 }
 
-// Create a security group
+# Create a security group
 resource "aws_security_group" "sg_ec2" {
   name        = "sg_ec2"
   description = "Security group for EC2"
@@ -56,12 +55,10 @@ resource "aws_security_group" "sg_ec2" {
   }
 }
 
-// Create an EC2 instance
 resource "aws_instance" "game-server" {
-  count         = 1
-  ami           = "ami-0972a4c30cc617cd4"
-  instance_type = "t2.micro"
-  key_name      = aws_key_pair.key_pair[count.index].key_name
+  ami                    = "ami-0972a4c30cc617cd4"
+  instance_type          = "t2.micro"
+  key_name               = aws_key_pair.key_pair.key_name
   vpc_security_group_ids = [aws_security_group.sg_ec2.id]
 
   tags = {
@@ -72,53 +69,18 @@ resource "aws_instance" "game-server" {
     volume_size = 30
     volume_type = "gp2"
   }
-
-  provisioner "local-exec" {
-    when    = "create"
-    command = "touch dynamic_inventory.ini"
-  }
-
-  provisioner "remote-exec" {
-    when    = "create"
-    inline = [
-      "echo 'EC2 instance is ready.'"
-    ]
-
-    connection {
-      type        = "ssh"
-      host        = self.public_ip
-      user        = "ubuntu"
-      private_key = tls_private_key.rsa_4096.private_key_pem
-    }
-  }
 }
 
-// Generate inventory file for Ansible
 data "template_file" "inventory" {
-  count = aws_instance.game-server.count
-
   template = <<-EOT
     [ec2_instances]
-    ${aws_instance.game-server[count.index].public_ip} ansible_user=ubuntu ansible_private_key_file=${path.module}/${var.key_name}
-  EOT
+    ${aws_instance.game-server.private_ip} ansible_user=ubuntu ansible_private_key_file=${path.module}/${var.key_name}
+    EOT
 }
 
 resource "local_file" "dynamic_inventory" {
-  count = aws_instance.game-server.count
+  depends_on = [aws_instance.game-server]
 
   filename = "dynamic_inventory.ini"
-  content  = data.template_file.inventory[count.index].rendered
-
-  provisioner "local-exec" {
-    command = "chmod 400 ${local_file.dynamic_inventory[count.index].filename}"
-  }
-}
-
-resource "null_resource" "run_ansible" {
-  depends_on = [local_file.dynamic_inventory]
-
-  provisioner "local-exec" {
-    command    = "ansible-playbook -i dynamic_inventory.ini install-docker-on-ubuntu.yml"
-    working_dir = path.module
-  }
+  content  = data.template_file.inventory.rendered
 }
