@@ -42,7 +42,7 @@ resource "local_file" "private_key" {
 
 # Create a security group
 resource "aws_security_group" "sg_ec2" {
-  name        = "sg_ec2"
+  name        = "sg_ec22"
   description = "Security group for EC2"
 
   ingress {
