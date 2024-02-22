@@ -9,8 +9,8 @@ terraform {
 
 provider "aws" {
   region     = "eu-central-1"
-  access_key = ""
-  secret_key = ""
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
 }
 
 // To Generate Private Key
@@ -21,7 +21,7 @@ resource "tls_private_key" "rsa_4096" {
 
 variable "key_name" {
   description = "Name of the SSH key pair"
-  default     = "gammm"
+  default     = "gam"
 }
 
 // Create Key Pair for Connecting EC2 via SSH
