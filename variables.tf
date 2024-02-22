@@ -1,4 +1,4 @@
-ariable "aws_access_key" {
+variable "aws_access_key" {
   description = "AWS access key"
   type        = string
   default     = ""
