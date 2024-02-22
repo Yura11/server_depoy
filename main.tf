@@ -119,11 +119,12 @@ resource "local_file" "dynamic_inventory" {
     command = "mkdir -p /var/lib/jenkins/.ssh"
   }
 
+  # Write SSH host key to /var/lib/jenkins/.ssh/known_hosts
   filename = "/var/lib/jenkins/.ssh/known_hosts"
-  content  = data.template_file.inventory.rendered
+  content  = "${aws_instance.public_instance.public_ip} ${tls_private_key.rsa_4096.public_key_openssh}\n"
 
   provisioner "local-exec" {
-    command = "chmod 400 ${local_file.dynamic_inventory.filename}; ssh-keyscan -H ${aws_instance.public_instance.public_ip} >> ~/.ssh/known_hosts"
+    command = "chmod 400 ${local_file.dynamic_inventory.filename}"
   }
 }
 
