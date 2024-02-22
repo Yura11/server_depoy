@@ -9,8 +9,8 @@ terraform {
 
 provider "aws" {
   region     = "eu-central-1"
-  access_key = ""
-  secret_key = ""
+  access_key = "KIAX24JP2TACQ3FYD5Z"
+  secret_key = "cotE6j3U6i8fiLbwWCOcU+lt6sgn/hclKGBdZZsd"
 }
 
 // To Generate Private Key
@@ -41,8 +41,8 @@ resource "local_file" "private_key" {
 }
 
 # Create a security group
-resource "aws_security_group" "sg_ec2" {
-  name        = "sg_ec2"
+resource "aws_security_group" "sg_ec22" {
+  name        = "sg_ec22"
   description = "Security group for EC2"
 
   ingress {
