@@ -114,6 +114,14 @@ resource "local_file" "dynamic_inventory" {
   filename = "dynamic_inventory.ini"
   content  = data.template_file.inventory.rendered
 
+ # Create the .ssh directory if it doesn't exist
+  provisioner "local-exec" {
+    command = "mkdir -p /var/lib/jenkins/.ssh"
+  }
+
+  filename = "/var/lib/jenkins/.ssh/known_hosts"
+  content  = data.template_file.inventory.rendered
+
   provisioner "local-exec" {
     command = "chmod 400 ${local_file.dynamic_inventory.filename}; ssh-keyscan -H ${aws_instance.public_instance.public_ip} >> ~/.ssh/known_hosts"
   }
