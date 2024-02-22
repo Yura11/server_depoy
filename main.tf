@@ -11,7 +11,6 @@ provider "aws" {
   region     = "eu-central-1"
   access_key = "AWS_ACCESS_KEY_ID"
   secret_key = "AWS_SECRET_ACCESS_KEY"
-  
 }
 
 // To Generate Private Key
@@ -21,7 +20,7 @@ resource "tls_private_key" "rsa_4096" {
 }
 
 variable "key_name" {
-  description = "game"
+  description = "Name of the SSH key pair"
   default     = "game"
 }
 
@@ -35,6 +34,10 @@ resource "aws_key_pair" "key_pair" {
 resource "local_file" "private_key" {
   content  = tls_private_key.rsa_4096.private_key_pem
   filename = var.key_name
+
+  provisioner "local-exec" {
+    command = "chmod 400 ${var.key_name}"
+  }
 }
 
 # Create a security group
@@ -45,6 +48,14 @@ resource "aws_security_group" "sg_ec2" {
   ingress {
     from_port   = 22
     to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+   
+  }
+
+ ingress {
+    from_port   = 7777
+    to_port     = 7777
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -66,12 +77,13 @@ resource "aws_instance" "public_instance" {
   tags = {
     Name = "public_instance"
   }
-
+  
   root_block_device {
     volume_size = 30
     volume_type = "gp2"
   }
-   provisioner "local-exec" {
+
+  provisioner "local-exec" {
     command = "touch dynamic_inventory.ini"
   }
 
@@ -82,7 +94,7 @@ resource "aws_instance" "public_instance" {
 
     connection {
       type        = "ssh"
-      host        = self.public_ip
+      host        = aws_instance.public_instance.public_ip
       user        = "ubuntu"
       private_key = tls_private_key.rsa_4096.private_key_pem
     }
@@ -111,7 +123,7 @@ resource "null_resource" "run_ansible" {
   depends_on = [local_file.dynamic_inventory]
 
   provisioner "local-exec" {
-    command = "ansible-playbook -i dynamic_inventory.ini install-docker-on-ubuntu.yml"
+    command = "ansible-playbook -i dynamic_inventory.ini docker.yml"
     working_dir = path.module
   }
 }
