@@ -20,3 +20,26 @@
         name: docker-compose
         state: present
         executable: pip3
+
+   
+    - name: Clone Git repository
+      git:
+        repo: https://github.com/Yura11/docker_deploy.git
+        dest: /home/docker_deploy
+
+    - name: Build Docker image
+      docker_image:
+        source: "build"
+        build:
+          path: /home/docker_deploy
+        name: server_build
+        tag: 1.0
+
+    - name: Run Docker container
+      docker_container:
+        name: server_build_
+        image: server_build:1.0
+        state: started
+        ports:
+          - "7777:7777"
+        detach: true
