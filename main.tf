@@ -21,7 +21,7 @@ resource "tls_private_key" "rsa_4096" {
 
 variable "key_name" {
   description = "Name of the SSH key pair"
-  default     = "gggg"
+  default     = "eeee"
 }
 
 // Create Key Pair for Connecting EC2 via SSH
