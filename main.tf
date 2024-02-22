@@ -21,7 +21,7 @@ resource "tls_private_key" "rsa_4096" {
 
 variable "key_name" {
   description = "Name of the SSH key pair"
-  default     = "eee"
+  default     = "yura"
 }
 
 // Create Key Pair for Connecting EC2 via SSH
@@ -50,10 +50,9 @@ resource "aws_security_group" "sg_ec2" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-   
   }
 
- ingress {
+  ingress {
     from_port   = 7777
     to_port     = 7777
     protocol    = "tcp"
@@ -105,7 +104,7 @@ data "template_file" "inventory" {
   template = <<-EOT
     [ec2_instances]
     ${aws_instance.public_instance.public_ip} ansible_user=ubuntu ansible_private_key_file=${path.module}/${var.key_name}
-    EOT
+  EOT
 }
 
 resource "local_file" "dynamic_inventory" {
@@ -114,14 +113,15 @@ resource "local_file" "dynamic_inventory" {
   filename = "dynamic_inventory.ini"
   content  = data.template_file.inventory.rendered
 
- # Create the .ssh directory if it doesn't exist
+  # Create the .ssh directory if it doesn't exist
   provisioner "local-exec" {
     command = "mkdir -p /var/lib/jenkins/.ssh"
   }
 
   # Write SSH host key to /var/lib/jenkins/.ssh/known_hosts
-  filename = "/var/lib/jenkins/.ssh/known_hosts"
-  content  = "${aws_instance.public_instance.public_ip} ${tls_private_key.rsa_4096.public_key_openssh}\n"
+  provisioner "local-exec" {
+    command = "echo '${aws_instance.public_instance.public_ip} ${tls_private_key.rsa_4096.public_key_openssh}' >> /var/lib/jenkins/.ssh/known_hosts"
+  }
 
   provisioner "local-exec" {
     command = "chmod 400 ${local_file.dynamic_inventory.filename}"
@@ -132,7 +132,7 @@ resource "null_resource" "run_ansible" {
   depends_on = [local_file.dynamic_inventory]
 
   provisioner "local-exec" {
-    command = "ansible-playbook -i dynamic_inventory.ini docker.yml"
+    command     = "ansible-playbook -i dynamic_inventory.ini docker.yml"
     working_dir = path.module
   }
 }
