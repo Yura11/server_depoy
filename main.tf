@@ -116,6 +116,7 @@ resource "local_file" "dynamic_inventory" {
 
   provisioner "local-exec" {
     command = "chmod 400 ${local_file.dynamic_inventory.filename}"
+    command = "ssh-keyscan -H ${aws_instance.public_instance.public_ip} >> ~/.ssh/known_hosts"
   }
 }
 
