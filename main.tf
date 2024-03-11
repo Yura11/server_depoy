@@ -113,12 +113,12 @@ resource "local_file" "dynamic_inventory" {
   filename = "dynamic_inventory.ini"
   content  = data.template_file.inventory.rendered
 
-  # Create the .ssh directory if it doesn't exist
+ 
   provisioner "local-exec" {
     command = "mkdir -p /var/lib/jenkins/.ssh"
   }
 
-  # Write SSH host key to /var/lib/jenkins/.ssh/known_hosts
+  
   provisioner "local-exec" {
     command = "echo '${aws_instance.public_instance.public_ip} ${tls_private_key.rsa_4096.public_key_openssh}' >> /var/lib/jenkins/.ssh/known_hosts"
   }
