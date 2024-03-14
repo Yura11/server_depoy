@@ -69,7 +69,7 @@ ingress {
     from_port   = 9090
     to_port     = 9090
     protocol    = "tcp"
-    cidr_blocks = [aws_instance.public_instance.public_ip]
+    cidr_blocks = ["${aws_instance.public_instance.public_ip}"]
   }
 
   egress {
