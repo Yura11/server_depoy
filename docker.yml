@@ -32,21 +32,36 @@
 
     - name: Build Docker image
       docker_image:
-        source: "build"
+        name: server_build:1.0
         build:
           path: /home/docker_deploy
-        name: server_build
-        tag: 1.0
 
     - name: Run Docker container
       docker_container:
-        name: server_build_
+        name: server_build_container
         image: server_build:1.0
         state: started
         ports:
           - "7777:7777"
         detach: true
-        
-     - name: Configure services
-        docker_compose:
-        project_src: ./docker-compose.yml
+
+- name: Setup Prometheus, Node Exporter, and Grafana
+  hosts: ec2_instances
+  become: true
+  gather_facts: yes
+  ignore_errors: yes
+  vars:
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+  tasks:
+    - name: Install Prometheus, Node Exporter, and Grafana containers
+      docker_container:
+        name: "{{ item.name }}"
+        image: "{{ item.image }}"
+        state: started
+        ports: "{{ item.ports }}"
+        detach: true
+      loop:
+        - { name: "prometheus", image: "prom/prometheus:latest", ports: ["9090:9090"] }
+        - { name: "node-exporter", image: "prom/node-exporter:latest", ports: ["9100:9100"], restart_policy: "unless-stopped" }
+        - { name: "grafana", image: "grafana/grafana", ports: ["3000:3000"], environment: ["GF_SECURITY_ADMIN_PASSWORD=password"], depends_on: ["prometheus"] }
