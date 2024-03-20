@@ -3,13 +3,12 @@ pipeline {
 
     parameters {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
-        choice(name: 'action', choices: ['apply', 'destroy'], description: 'Select the action to perform')
+        choice(name: 'action', choices: ['apply', 'destroy', 'deploy infrastructure'], description: 'Select the action to perform')
     }
 
     environment {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-access-secret-key')
-      
     }
 
     stages {
@@ -29,7 +28,7 @@ pipeline {
                 sh 'terraform show -no-color tfplan > tfplan.txt'
             }
         }
-        stage('Apply / Destroy') {
+        stage('Apply / Destroy / Deploy') {
             steps {
                 script {
                     if (params.action == 'apply') {
@@ -38,16 +37,21 @@ pipeline {
                             input message: "Do you want to apply the plan?",
                             parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
                         }
-
-                        sh 'terraform ${action} -input=false tfplan'
+                        sh 'terraform apply -input=false tfplan'
                     } else if (params.action == 'destroy') {
-                        sh 'terraform ${action} --auto-approve'
+                        sh 'terraform destroy --auto-approve'
+                    } else if (params.action == 'deploy infrastructure') {
+                        def pingResult = sh(script: "ansible all -m ping -i dynamic_inventory.ini", returnStatus: true)
+                        if (pingResult == 0) {
+                            sh 'ansible-playbook -i dynamic_inventory.ini docker.yml'
+                        } else {
+                            error "Ping failed. Unable to deploy infrastructure."
+                        }
                     } else {
-                        error "Invalid action selected. Please choose either 'apply' or 'destroy'."
+                        error "Invalid action selected. Please choose either 'apply', 'destroy', or 'deploy infrastructure'."
                     }
                 }
             }
         }
-
     }
 }
