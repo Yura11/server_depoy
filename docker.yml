@@ -46,41 +46,7 @@
         ports:
           - "7777:7777"
         detach: true
-
-    - name: Run Prometheus, Node Exporter, and Grafana containers
-      docker_container:
-        name: "{{ item.name }}"
-        image: "{{ item.image }}"
-        container_name: "{{ item.container_name }}"
-        ports: "{{ item.ports }}"
-        command: "{{ item.command }}"
-        volumes: "{{ item.volumes }}"
-        depends_on: "{{ item.depends_on }}"
-        state: started
-      loop:
-        - name: prometheus
-          image: prom/prometheus:latest
-          container_name: prometheus
-          ports:
-            - "9090:9090"
-          command:
-            - --config.file=/etc/prometheus/prometheus.yml
-          volumes:
-            - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-          depends_on:
-            - node-exporter
-        - name: node-exporter
-          image: prom/node-exporter:latest
-          container_name: node-exporter
-          restart: unless-stopped
-          expose:
-            - 9100
-        - name: grafana
-          image: grafana/grafana
-          container_name: grafana
-          ports:
-            - "3000:3000"
-          environment:
-            - GF_SECURITY_ADMIN_PASSWORD=password
-          depends_on:
-            - prometheus
+        
+     - name: Configure services
+        docker_compose:
+        project_src: ./docker-compose.yml
