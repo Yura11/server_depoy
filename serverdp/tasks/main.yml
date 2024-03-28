@@ -38,5 +38,5 @@
 
 - name: Run docker-compose
   docker_compose:
-    project_src: ./defaults/docker-compose.yml
+    project_src: ./defaults/
     state: present
