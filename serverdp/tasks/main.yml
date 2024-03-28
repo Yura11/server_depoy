@@ -29,8 +29,6 @@
       - docker-ce
       - docker-ce-cli
       - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
     state: present
 
 - name: Install Docker-compose
@@ -38,6 +36,12 @@
     name:
       - docker-compose
     state: present
+
+- name: Install Docker Python library
+  pip:
+    name: docker
+    state: present
+
 - name: Clone Git repository
   git:
     repo: https://github.com/Yura11/docker_deploy.git
@@ -67,4 +71,3 @@
 - name: Run docker-compose up
   ansible.builtin.shell:
     cmd: "docker-compose -f /home/docker_deploy/docker-compose.yml up -d"
-
