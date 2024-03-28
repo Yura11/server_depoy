@@ -23,7 +23,8 @@
 
 - name: Build Docker image
   docker_image:
-    name: server_build:1.0
+    name: server_build
+    tag: 1.0
     build:
       path: /home/docker_deploy
 
@@ -36,7 +37,12 @@
       - "7777:7777"
     detach: true
 
-- name: Run docker-compose
-  docker_compose:
-    project_src: ./defaults/
-    state: present
+- name: Copy docker-compose.yml to remote machine
+  ansible.builtin.copy:
+    src: defaults/docker-compose.yml
+    dest: /home/docker_deploy/
+    
+- name: Run docker-compose up
+  ansible.builtin.shell:
+    cmd: "docker-compose -f /home/docker_deploy/docker-compose.yml up -d"
+
