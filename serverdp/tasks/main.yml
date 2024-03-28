@@ -1,0 +1,42 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install Docker dependencies
+  apt:
+    name:
+      - docker.io
+      - python3-pip
+    state: present
+
+- name: Install Docker Compose
+  pip:
+    name: docker-compose
+    state: present
+    executable: pip3
+
+- name: Clone Git repository
+  git:
+    repo: https://github.com/Yura11/docker_deploy.git
+    dest: /home/docker_deploy
+
+- name: Build Docker image
+  docker_image:
+    name: server_build:1.0
+    build:
+      path: /home/docker_deploy
+
+- name: Run Docker container
+  docker_container:
+    name: server_build_container
+    image: server_build:1.0
+    state: started
+    ports:
+      - "7777:7777"
+    detach: true
+
+- name: Run docker-compose
+  docker_compose:
+    project_src: ./defaults/docker-compose.yml
+    state: present
