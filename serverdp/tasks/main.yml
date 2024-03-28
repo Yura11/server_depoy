@@ -6,19 +6,38 @@
 - name: Install Docker dependencies
   apt:
     name:
-      - docker.io
-      - python3-pip
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
     state: present
 
-- name: Install Docker Compose
-  become: yes
-  command: >
-    curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system }}-{{ ansible_architecture }} -o /usr/local/bin/docker-compose && \
-    chmod +x /usr/local/bin/docker-compose
-  args:
-    creates: /usr/local/bin/docker-compose
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
 
+- name: Add Docker repository to Apt sources
+  apt_repository:
+    repo: "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    state: present
 
+- name: Install Docker packages
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+
+- name: Install Docker-compose
+  apt:
+    name:
+      - docker-compose
+    state: present
 - name: Clone Git repository
   git:
     repo: https://github.com/Yura11/docker_deploy.git
