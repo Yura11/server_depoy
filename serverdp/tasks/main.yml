@@ -11,9 +11,13 @@
     state: present
 
 - name: Install Docker Compose
-  apt:
-    name: docker-compose
-    state: present
+  become: yes
+  command: >
+    curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system }}-{{ ansible_architecture }} -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose
+  args:
+    creates: /usr/local/bin/docker-compose
+
 
 - name: Clone Git repository
   git:
