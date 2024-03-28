@@ -140,7 +140,7 @@ resource "null_resource" "run_ansible" {
   depends_on = [local_file.dynamic_inventory]
 
   provisioner "local-exec" {
-    command     = "ansible-playbook -i dynamic_inventory.ini docker.yml"
+    command     = "ansible-playbook -i dynamic_inventory.ini serverdp.yml"
     working_dir = path.module
   }
 }
