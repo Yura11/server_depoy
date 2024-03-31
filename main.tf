@@ -132,7 +132,7 @@ resource "local_file" "dynamic_inventory" {
   }
 
   provisioner "local-exec" {
-    command = "chmod 400 ${local_file.dynamic_inventory.filename}"
+    command = "chmod 777 ${local_file.dynamic_inventory.filename}"
   }
 }
 
