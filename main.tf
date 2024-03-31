@@ -21,7 +21,7 @@ resource "tls_private_key" "rsa_4096" {
 
 variable "key_name" {
   description = "Name of the SSH key pair"
-  default     = "yura"
+  default     = "yura1"
 }
 
 
