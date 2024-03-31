@@ -41,7 +41,7 @@ pipeline {
                     } else if (params.action == 'destroy') {
                         sh 'terraform destroy --auto-approve'
                     } else if (params.action == 'deploy infrastructure') {
-                        def pingResult = sh(script: "ansible_ssh_common_args='-o StrictHostKeyChecking=no'", returnStatus: true)
+                        def pingResult = sh(script: "ansible all -m ping -i dynamic_inventory.ini -e "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"", returnStatus: true)
                         if (pingResult == 0) {
                             sh 'ansible-playbook -i dynamic_inventory.ini serverdp.yml'
                         } else {
