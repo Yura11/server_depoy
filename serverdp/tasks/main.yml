@@ -48,7 +48,7 @@
 
 - name: Copy Prometheus configuration file
   copy:
-    src: /home/docker_deploy/prometheus.yml
+    src: /etc/prometheus/prometheus.yml
     dest: /home/docker_deploy/prometheus/
 
 - name: Run Prometheus container
