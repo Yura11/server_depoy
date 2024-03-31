@@ -36,7 +36,56 @@
       - "7777:7777"
     detach: true
 
-- name: Run docker-compose
-  docker_compose:
-    project_src: ./defaults/
-    state: present
+- name: Download Prometheus Docker image
+  docker_image:
+    name: prom/prometheus
+    tag: latest
+
+- name: Create Prometheus configuration directory
+  file:
+    path: /home/docker_deploy/prometheus
+    state: directory
+
+- name: Copy Prometheus configuration file
+  copy:
+    src: /home/docker_deploy/prometheus.yml
+    dest: /home/docker_deploy/prometheus/
+
+- name: Run Prometheus container
+  docker_container:
+    name: prometheus_container
+    image: prom/prometheus
+    state: started
+    ports:
+      - "9090:9090"
+    volumes:
+      - /home/docker_deploy/prometheus:/etc/prometheus
+    detach: true
+
+- name: Download Grafana Docker image
+  docker_image:
+    name: grafana/grafana
+    tag: latest
+
+- name: Run Grafana container
+  docker_container:
+    name: grafana_container
+    image: grafana/grafana
+    state: started
+    ports:
+      - "3000:3000"
+    detach: true
+
+- name: Download Node Exporter Docker image
+  docker_image:
+    name: prom/node-exporter
+    tag: latest
+
+- name: Run Node Exporter container
+  docker_container:
+    name: node_exporter_container
+    image: prom/node-exporter
+    state: started
+    ports:
+      - "9100:9100"
+    detach: true
