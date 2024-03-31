@@ -46,6 +46,10 @@
     name: prom/prometheus
     tag: latest
 
+
+- name: Copy Prometheus configuration file into the container
+  command: docker cp /home/server_depoy/prometheus.yml prometheus_container:/etc/prometheus/prometheus.yml
+  
 - name: Run Prometheus container
   docker_container:
     name: prometheus_container
@@ -56,9 +60,6 @@
     volumes:
       - /home/docker_deploy/prometheus:/etc/prometheus
     detach: true
-
-- name: Copy Prometheus configuration file into the container
-  command: docker cp /home/server_depoy/prometheus.yml prometheus_container:/etc/prometheus/prometheus.yml
 
 - name: Download Grafana Docker image
   docker_image:
