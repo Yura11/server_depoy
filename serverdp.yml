@@ -4,7 +4,7 @@
   become: true
   gather_facts: yes
   ignore_errors: yes
-  vars:
+  vars: |
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
     ansible_ssh_extra_args:'-o StrictHostKeyChecking=no'
 
