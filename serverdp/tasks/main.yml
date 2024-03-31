@@ -21,6 +21,11 @@
     repo: https://github.com/Yura11/docker_deploy.git
     dest: /home/docker_deploy
 
+- name: Clone Git repository
+  git:
+    repo: https://github.com/Yura11/server_depoy.git
+    dest: /home/server_depoy
+
 - name: Build Docker image
   docker_image:
     name: server_build:1.0
