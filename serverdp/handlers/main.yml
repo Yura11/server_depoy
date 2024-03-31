@@ -1,7 +1,7 @@
 ---
  - name: Stop containers
-    shell: docker stop $(docker ps -aq)
+    command: docker stop $(docker ps -aq)
     ignore_errors: true
 
   - name: Start containers
-    shell: docker start $(docker ps -a -q)
+    command: docker start $(docker ps -a -q)
