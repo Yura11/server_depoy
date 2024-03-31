@@ -3,5 +3,5 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
     - targets:
-      - prometheus:9090
-      - node-exporter:9100
+      - 3.71.177.231:9090
+      - 3.71.177.231:9100
