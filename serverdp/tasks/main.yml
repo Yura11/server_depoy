@@ -88,10 +88,7 @@
     ports:
       - "9100:9100"
     detach: true
-
-- name: Trigger container stop
-  notify: Stop containers
-
-- name: Trigger container start
-  notify: Start containers
+  notify:
+    - Stop containers
+    - Start containers
 
