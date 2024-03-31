@@ -1,2 +1,7 @@
 ---
-# handlers file for serverdp
+ - name: Stop containers
+    shell: docker stop $(docker ps -aq)
+    ignore_errors: true
+
+  - name: Start containers
+    shell: docker start $(docker ps -a -q)
