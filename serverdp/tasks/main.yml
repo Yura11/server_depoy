@@ -41,15 +41,12 @@
     name: prom/prometheus
     tag: latest
 
-- name: Create Prometheus configuration directory
-  file:
-    path: /home/docker_deploy/prometheus
-    state: directory
-
-- name: Copy Prometheus configuration file
-  copy:
+- name: Copy Prometheus configuration file into the container
+  docker_cp:
     src: /etc/prometheus/prometheus.yml
-    dest: /home/docker_deploy/prometheus/
+    dest: /etc/prometheus/prometheus.yml
+    container: prometheus_container
+
 
 - name: Run Prometheus container
   docker_container:
