@@ -43,7 +43,7 @@ pipeline {
                     } else if (params.action == 'deploy infrastructure') {
                         def pingResult = sh(script: "ansible all -m ping -i dynamic_inventory.ini", returnStatus: true)
                         if (pingResult == 0) {
-                            sh 'ansible-playbook -i dynamic_inventory.ini docker.yml'
+                            sh 'ansible-playbook -i dynamic_inventory.ini serverdp.yml'
                         } else {
                             error "Ping failed. Unable to deploy infrastructure."
                         }
