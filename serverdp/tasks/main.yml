@@ -53,7 +53,7 @@
     detach: true
 
 - name: Copy Prometheus configuration file into the container
-  command: docker cp /etc/prometheus/prometheus.yml prometheus_container:/etc/prometheus/prometheus.yml
+  command: docker cp /home/docker_deploy/prometheus.yml prometheus_container:/etc/prometheus/prometheus.yml
 
 - name: Download Grafana Docker image
   docker_image:
