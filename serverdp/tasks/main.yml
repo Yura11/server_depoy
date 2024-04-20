@@ -64,7 +64,7 @@
 - name: Copy prometheus.yml from repository to /etc/prometheus/
   copy:
     src: /home/docker_deploy/prometheus.yml
-    dest: /etc/prometheus/prometheus.yml
+    dest: /home
   become: yes
 
 - name: Copy docker-compose.yml from defaults to target directory
