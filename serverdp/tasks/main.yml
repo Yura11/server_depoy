@@ -3,18 +3,31 @@
   apt:
     update_cache: yes
 
-- name: Install Docker dependencies
+- name: Install ca-certificates and curl
   apt:
     name:
-      - docker.io
-      - python3-pip
+      - ca-certificates
+      - curl
     state: present
 
+- name: Create directory for apt keyrings
+  command: mkdir -m 0755 -p /etc/apt/keyrings
+
+- name: Download Docker GPG key
+  command: curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+
+- name: Add Docker repository to Apt sources
+  command: >
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+- name: Update apt cache after adding Docker repository
+  apt:
+    update_cache: yes
+
 - name: Install Docker Compose
-  pip:
+  apt:
     name: docker-compose
     state: present
-    executable: pip3
 
 - name: Clone Git repository
   git:
@@ -41,52 +54,6 @@
       - "7777:7777"
     detach: true
 
-- name: Download Prometheus Docker image
-  docker_image:
-    name: prom/prometheus
-    tag: latest
 
 
-- name: Copy Prometheus configuration file into the container
-  command: docker cp /home/server_depoy/prometheus.yml prometheus_container:/etc/prometheus/prometheus.yml
-  
-- name: Run Prometheus container
-  docker_container:
-    name: prometheus_container
-    image: prom/prometheus
-    state: started
-    ports:
-      - "9090:9090"
-    volumes:
-      - /home/docker_deploy/prometheus:/etc/prometheus
-    detach: true
-
-- name: Download Grafana Docker image
-  docker_image:
-    name: grafana/grafana
-    tag: latest
-
-- name: Run Grafana container
-  docker_container:
-    name: grafana_container
-    image: grafana/grafana
-    state: started
-    ports:
-      - "3000:3000"
-    detach: true
-
-- name: Download Node Exporter Docker image
-  docker_image:
-    name: prom/node-exporter
-    tag: latest
-
-- name: Run Node Exporter container
-  docker_container:
-    name: node_exporter_container
-    image: prom/node-exporter
-    state: started
-    ports:
-      - "9100:9100"
-    detach: true
-  
 
