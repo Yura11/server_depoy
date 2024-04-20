@@ -1,6 +1,6 @@
 version: '3'
 services:
- prometheus:
+  prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
