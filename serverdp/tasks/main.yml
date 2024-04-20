@@ -54,6 +54,16 @@
       - "7777:7777"
     detach: true
 
+- name: Copy docker-compose.yml from templates to target directory
+  template:
+    src: defaults/docker-compose.yml
+    dest: /home
+
+- name: Run Docker Compose from defaults
+  command: docker-compose up -d
+  args:
+    chdir: /home
+
 
 
 
