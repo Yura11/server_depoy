@@ -57,5 +57,5 @@
 - name: Run Docker Compose from defaults
   command: sudo docker-compose up -d
   args:
-    chdir: /home/docker_deploy
+    chdir: /home/server_depoy
   become: yes
