@@ -43,19 +43,19 @@ services:
       - 3306:3306
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./mysql/db:/docker-entrypoint-initdb.d
+      - ./server/mysql:/docker-entrypoint-initdb.d
     restart: unless-stopped
 
   server:
     build:
-      context: .
+      context: ./server
     container_name: server
     ports:
       - 7777:7777
 
   webapp:
     build:
-      context: ./WebServer
+      context: ./server/WebServer
     container_name: webserver
     ports:
       - 80:80
