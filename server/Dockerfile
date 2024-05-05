@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /usr/local/Server
 WORKDIR /usr/local/Server
 
-COPY Server/* .
+COPY Server/ /usr/local/Server/
 
 # Set appropriate permissions for the server executable
 RUN chmod +x /usr/local/Server/Server.x86_64
