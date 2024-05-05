@@ -1,4 +1,5 @@
 version: '3'
+
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -29,3 +30,35 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=password
     depends_on:
       - prometheus
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/db:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+
+  server:
+    build:
+      context: .
+    container_name: server
+    ports:
+      - 7777:7777
+
+  webapp:
+    build:
+      context: ./WebServer
+    container_name: webserver
+    ports:
+      - 80:80
+
+volumes:
+  mysql-data:
