@@ -32,27 +32,12 @@
 - name: Clone Git repository
   git:
     repo: https://github.com/Yura11/docker_deploy.git
-    dest: /home/docker_deploy
+    dest: /home/server
 
 - name: Clone Git repository
   git:
     repo: https://github.com/Yura11/server_depoy.git
-    dest: /home/server_depoy
-
-- name: Build Docker image
-  docker_image:
-    name: server_build:1.0
-    build:
-      path: /home/docker_deploy
-
-- name: Run Docker container
-  docker_container:
-    name: server_build_container
-    image: server_build:1.0
-    state: started
-    ports:
-      - "7777:7777"
-    detach: true
+    dest: /home/server
 
 - name: Run Docker Compose from defaults
   command: sudo docker-compose up -d
