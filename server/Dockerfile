@@ -13,11 +13,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN mkdir -p /usr/local/Server
 WORKDIR /usr/local/Server
 
-# Clone your project repository
-RUN git clone https://github.com/Yura11/docker_deploy.git .
+COPY Server/* .
 
 # Set appropriate permissions for the server executable
-RUN chmod +x /usr/local/Server/Server/Server.x86_64
+RUN chmod +x /usr/local/Server/Server.x86_64
 
 # Expose the port the server listens on
 EXPOSE 7777
