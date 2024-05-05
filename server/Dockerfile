@@ -20,4 +20,4 @@ RUN chmod +x /usr/local/Server/Server.x86_64
 EXPOSE 7777
 
 # Command to run your server
-CMD ["bash", "-c", "Server.x86_64"]
+CMD ["bash", "-c", "./Server.x86_64"]
