@@ -51,7 +51,7 @@ services:
       context: ./server
     container_name: server
     ports:
-      - 7777:7777
+      - 7778:7778
 
   webapp:
     build:
