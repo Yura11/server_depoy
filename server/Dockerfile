@@ -17,7 +17,7 @@ COPY Server/ /usr/local/Server/
 RUN chmod +x /usr/local/Server/Server.x86_64
 
 # Expose the port the server listens on
-EXPOSE 7777
+EXPOSE 7778
 
 # Command to run your server
 CMD ["bash", "-c", "./Server.x86_64"]
