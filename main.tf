@@ -4,13 +4,12 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 4.0"
     }
+  }
 
-    backend "s3" {
-      bucket = "yurabel"
-      key    = "terraform/lab1"
-      region = "eu-central-1"
-    }
-
+  backend "s3" {
+    bucket = "yurabel"
+    key    = "terraform/lab1"
+    region = "eu-central-1"
   }
 }
 
