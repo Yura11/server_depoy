@@ -1,0 +1,157 @@
+resource_types:
+- name: telegram-notification
+  type: docker-image
+  source:
+    repository: w32blaster/concourse-telegram-notifier
+    tag: latest
+
+resources:
+- name: telegram
+  type: telegram-notification
+  source:
+    bot_token: ((bot_token))
+
+- name: terraform-repo
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/Yura11/server_depoy.git
+    branch: main
+
+
+jobs:
+- name: tflint
+  plan:
+    - get: terraform-repo
+      trigger: true
+    - task: run-tflint
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: wata727/tflint
+            tag: latest
+        inputs:
+          - name: terraform-repo
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd terraform-repo
+              tflint
+      on_success:
+        put: telegram
+        params:
+          chat_id: ((chat_id))
+          text: |
+            :tflint: *Job Succeeded*:
+      on_failure:
+        put: telegram
+        params:
+          chat_id: ((chat_id))
+          text: |
+            :tflint: *Job Failed*:
+
+- name: tf-fmt
+  plan:
+    - get: terraform-repo
+      trigger: true
+    - task: run-terraform-fmt
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: hashicorp/terraform
+            tag: latest
+        inputs:
+          - name: terraform-repo
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd terraform-repo
+              terraform fmt -check
+      on_success:
+        put: telegram
+        params:
+          chat_id: ((chat_id))
+          text: |
+            :tf-fmt: *Job Succeeded*:
+      on_failure:
+        put: telegram
+        params:
+          chat_id: ((chat_id))
+          text: |
+            :tf-fmt: *Job Failed*:
+
+- name: tf-apply-and-ansible
+  plan:
+    - get: terraform-repo
+      trigger: true
+      passed:
+        - tflint
+        - tf-fmt
+
+    - task: run-terraform-apply
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: hashicorp/terraform
+            tag: latest
+        inputs:
+          - name: terraform-repo
+        outputs:
+          - name: terraform-ansible
+        params:
+          AWS_ACCESS_KEY_ID: ((aws_access_key_id))
+          AWS_SECRET_ACCESS_KEY: ((aws_secret_key))
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd terraform-repo
+              terraform init
+              terraform plan
+              terraform apply --auto-approve
+              cp -r . ../terraform-ansible/
+
+    - task: run-ansible
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: ubuntu
+            tag: latest
+        inputs:
+          - name: terraform-ansible
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              export DEBIAN_FRONTEND=noninteractive
+              export TZ=Europe/London
+              apt-get update
+              apt-get install -y ansible
+              cd terraform-ansible
+              ansible-playbook -i dynamic_inventory.ini serverdp.yml
+      on_success:
+        put: telegram
+        params:
+          chat_id: ((chat_id))
+          text: |
+            *Terraform Apply & Ansible Playbook Succeeded*:
+      on_failure:
+        put: telegram
+        params:
+          chat_id: ((chat_id))
+          text: |
+            *Terraform Apply & Ansible Playbook Failed*:
