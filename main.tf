@@ -4,13 +4,18 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 4.0"
     }
+
+    backend "s3" {
+      bucket = "yurabel"
+      key    = "terraform/lab1"
+      region = "eu-central-1"
+    }
+
   }
 }
 
 provider "aws" {
-  region     = "eu-central-1"
-  access_key = var.aws_access_key
-  secret_key = var.aws_secret_key
+  region = "eu-central-1"
 }
 
 
@@ -91,7 +96,7 @@ resource "aws_instance" "public_instance" {
   tags = {
     Name = "public_instance"
   }
-  
+
   root_block_device {
     volume_size = 30
     volume_type = "gp2"
@@ -128,12 +133,12 @@ resource "local_file" "dynamic_inventory" {
   filename = "dynamic_inventory.ini"
   content  = data.template_file.inventory.rendered
 
- 
+
   provisioner "local-exec" {
     command = "mkdir -p /var/lib/jenkins/.ssh"
   }
 
-  
+
   provisioner "local-exec" {
     command = "echo '${aws_instance.public_instance.public_ip} ${tls_private_key.rsa_4096.public_key_openssh}' >> /var/lib/jenkins/.ssh/known_hosts"
   }
