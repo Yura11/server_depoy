@@ -47,12 +47,14 @@ jobs:
           chat_id: ((chat_id))
           text: |
             :tflint: *Job Succeeded*:
+          pull_repository: true
       on_failure:
         put: telegram
         params:
           chat_id: ((chat_id))
           text: |
             :tflint: *Job Failed*:
+          pull_repository: true
 
 - name: tf-fmt
   plan:
@@ -81,12 +83,14 @@ jobs:
           chat_id: ((chat_id))
           text: |
             :tf-fmt: *Job Succeeded*:
+          pull_repository: true
       on_failure:
         put: telegram
         params:
           chat_id: ((chat_id))
           text: |
             :tf-fmt: *Job Failed*:
+          pull_repository: true
 
 - name: tf-apply-and-ansible
   plan:
@@ -149,9 +153,11 @@ jobs:
           chat_id: ((chat_id))
           text: |
             *Terraform Apply & Ansible Playbook Succeeded*:
+          pull_repository: true
       on_failure:
         put: telegram
         params:
           chat_id: ((chat_id))
           text: |
-            *Terraform Apply & Ansible Playbook Failed*:
+            *Terraform Apply & Ansible Playbook Failed
+          pull_repository: true
