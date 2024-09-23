@@ -55,6 +55,13 @@ jobs:
           text: |
             :tflint: *Job Failed*:
           pull_repository: true
+      on_abort:
+        put: telegram
+        params:
+          chat_id: ((chat_id))
+          text: |
+            *Terraform Apply & Ansible Playbook Aborted
+          pull_repository: true
 
 - name: tf-fmt
   plan:
@@ -90,6 +97,13 @@ jobs:
           chat_id: ((chat_id))
           text: |
             :tf-fmt: *Job Failed*:
+          pull_repository: true
+      on_abort:
+        put: telegram
+        params:
+          chat_id: ((chat_id))
+          text: |
+            *Terraform Apply & Ansible Playbook Aborted
           pull_repository: true
 
 - name: tf-apply-and-ansible
@@ -160,4 +174,11 @@ jobs:
           chat_id: ((chat_id))
           text: |
             *Terraform Apply & Ansible Playbook Failed
+          pull_repository: true
+      on_abort:
+        put: telegram
+        params:
+          chat_id: ((chat_id))
+          text: |
+            *Terraform Apply & Ansible Playbook Aborted
           pull_repository: true
