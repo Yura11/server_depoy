@@ -60,7 +60,7 @@ jobs:
         params:
           chat_id: ((chat_id))
           text: |
-            *Terraform Apply & Ansible Playbook Aborted
+            *TFLint Job Aborted*:
           pull_repository: true
 
 - name: tf-fmt
@@ -103,7 +103,7 @@ jobs:
         params:
           chat_id: ((chat_id))
           text: |
-            *Terraform Apply & Ansible Playbook Aborted
+            *Terraform FMT Job Aborted*:
           pull_repository: true
 
 - name: tf-apply-and-ansible
@@ -139,6 +139,27 @@ jobs:
               terraform plan
               terraform apply --auto-approve
               cp -r . ../terraform-ansible/
+      on_success:
+        put: telegram
+        params:
+          chat_id: ((chat_id))
+          text: |
+            *Terraform Apply Succeeded*:
+          pull_repository: true
+      on_failure:
+        put: telegram
+        params:
+          chat_id: ((chat_id))
+          text: |
+            *Terraform Apply Failed*:
+          pull_repository: true
+      on_abort:
+        put: telegram
+        params:
+          chat_id: ((chat_id))
+          text: |
+            *Terraform Apply Job Aborted*:
+          pull_repository: true
 
     - task: run-ansible
       config:
@@ -166,19 +187,20 @@ jobs:
         params:
           chat_id: ((chat_id))
           text: |
-            *Terraform Apply & Ansible Playbook Succeeded*:
+            *Ansible Playbook Succeeded*:
           pull_repository: true
       on_failure:
         put: telegram
         params:
           chat_id: ((chat_id))
           text: |
-            *Terraform Apply & Ansible Playbook Failed
+            *Ansible Playbook Failed*:
           pull_repository: true
       on_abort:
         put: telegram
         params:
           chat_id: ((chat_id))
           text: |
-            *Terraform Apply & Ansible Playbook Aborted
+            *Ansible Playbook Job Aborted*:
           pull_repository: true
+
