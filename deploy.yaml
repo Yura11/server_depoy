@@ -41,27 +41,6 @@ jobs:
             - |
               cd terraform-repo
               tflint
-      on_success:
-        put: telegram
-        params:
-          chat_id: ((chat_id))
-          text: |
-            :tflint: *Job Succeeded*:
-          pull_repository: true
-      on_failure:
-        put: telegram
-        params:
-          chat_id: ((chat_id))
-          text: |
-            :tflint: *Job Failed*:
-          pull_repository: true
-      on_abort:
-        put: telegram
-        params:
-          chat_id: ((chat_id))
-          text: |
-            *TFLint Job Aborted*:
-          pull_repository: true
 
 - name: tf-fmt
   plan:
@@ -84,36 +63,13 @@ jobs:
             - |
               cd terraform-repo
               terraform fmt -check
-      on_success:
-        put: telegram
-        params:
-          chat_id: ((chat_id))
-          text: |
-            :tf-fmt: *Job Succeeded*:
-          pull_repository: true
-      on_failure:
-        put: telegram
-        params:
-          chat_id: ((chat_id))
-          text: |
-            :tf-fmt: *Job Failed*:
-          pull_repository: true
-      on_abort:
-        put: telegram
-        params:
-          chat_id: ((chat_id))
-          text: |
-            *Terraform FMT Job Aborted*:
-          pull_repository: true
-
+ 
 - name: tf-apply-and-ansible
   plan:
     - get: terraform-repo
-      trigger: true
       passed:
         - tflint
         - tf-fmt
-
     - task: run-terraform-apply
       config:
         platform: linux
@@ -139,27 +95,6 @@ jobs:
               terraform plan
               terraform apply --auto-approve
               cp -r . ../terraform-ansible/
-      on_success:
-        put: telegram
-        params:
-          chat_id: ((chat_id))
-          text: |
-            *Terraform Apply Succeeded*:
-          pull_repository: true
-      on_failure:
-        put: telegram
-        params:
-          chat_id: ((chat_id))
-          text: |
-            *Terraform Apply Failed*:
-          pull_repository: true
-      on_abort:
-        put: telegram
-        params:
-          chat_id: ((chat_id))
-          text: |
-            *Terraform Apply Job Aborted*:
-          pull_repository: true
 
     - task: run-ansible
       config:
@@ -182,25 +117,22 @@ jobs:
               apt-get install -y ansible
               cd terraform-ansible
               ansible-playbook -i dynamic_inventory.ini serverdp.yml
-      on_success:
-        put: telegram
-        params:
-          chat_id: ((chat_id))
-          text: |
-            *Ansible Playbook Succeeded*:
-          pull_repository: true
-      on_failure:
-        put: telegram
-        params:
-          chat_id: ((chat_id))
-          text: |
-            *Ansible Playbook Failed*:
-          pull_repository: true
-      on_abort:
-        put: telegram
-        params:
-          chat_id: ((chat_id))
-          text: |
-            *Ansible Playbook Job Aborted*:
-          pull_repository: true
+  on_success:
+    put: telegram
+    params:
+      chat_id: ((chat_id))
+      text: |
+        *Terraform Apply & Ansible Playbook Succeeded*:
+  on_failure:
+    put: telegram
+    params:
+      chat_id: ((chat_id))
+      text: |
+        *Terraform Apply & Ansible Playbook Failed*:
+  on_abort:
+    put: telegram
+    params:
+      chat_id: ((chat_id))
+      text: |
+        *Terraform Apply & Ansible Playbook Aborted*:
 
